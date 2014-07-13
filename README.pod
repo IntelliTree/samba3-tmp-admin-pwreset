@@ -1,0 +1,154 @@
+=head1 NAME
+
+tmp-admin-pwreset.pl - temporary administrative password reset tool
+
+=head1 USAGE
+
+./tmp-admin-pwreset.pl [USERNAME1,USERNAME2,@GROUP1... TEMP_PASSWORD|--restore|--help]
+
+
+=head1 REQUIREMENTS
+
+=over 1
+
+=item * Samba3 with tdbsam backend
+
+=item * shadow passwords
+
+=item * perl
+
+=item * Programs:
+
+=over 4
+
+=item tdbtool
+
+=item tdbdump
+
+=item chpasswd
+
+=item smbpasswd
+
+=item usermod
+
+=item date
+
+=item cat
+
+=back
+
+=back
+
+=head1 DESCRIPTION
+
+Temporarily resets UNIX and Samba passwords for administrative purposes. The script saves the original password hashes in a file (specified by $current_pw_hashes_db) to allow them to be reset to their original values later. This is useful for administrators who need to login I<as> users, but do not have their passwords. The administrator can unobtrusively login and work on a user account without the user having to change their password back later, or even knowing anything happened. 
+
+While passwords are in a temporarily reset state, the data is stored in the $current_pw_hashes_db file. Before modifying the user databases, the script backs up both user password database files (shadow file and passdb.tdb) to the directory specified by $pw_hashes_backup_dir with a timestamp in the filenames. All these files are protected by mode 0400, but its safe to go back and delete them later on (the backups are made just for safety reasons).
+
+
+=head1 EXAMPLES
+
+ ./tmp-admin-pwreset.pl jsmith pass
+	temporarily resets the password of user jsmith to 'pass'
+  
+ ./tmp-admin-pwreset.pl jsmith,lwatkins,foo apple
+	temporarily resets the password of users jsmith, lwatkins, 
+	and foo to 'apple'
+  
+ ./tmp-admin-pwreset.pl jsmith,@domain-users apple
+	temporarily resets the password of user jsmith, and all the 
+	users in the group 'domain-users' to 'apple'
+  
+ ./tmp-admin-pwreset.pl --restore
+	restores the passwords for all users whose passwords have been
+	temporarily reset.
+	
+ ./tmp-admin-pwreset.pl --help
+	Displays this perldoc page
+
+
+=head1 Original Mailing List Post
+
+This script was originally released open-source via post to the Samba
+mailing list:
+
+ From: Henry Van Styn <vanstyn at intellitree.com>
+ Date: Wed Apr 30 21:44:00 GMT 2008
+ Subject: [Samba] tmp-admin-pwreset.pl - temporary administrative password reset tool
+
+ I have written a Samba administrative perl script that I wanted to 
+ share with the community.
+
+ We use Samba3 with a tdbsam backend (set to be synchronized with the 
+ UNIX password database). Our users are Windows XP clients with 
+ roaming profiles. During the course of supporting our users, our 
+ techs frequently need to login *as* specific users to work on their 
+ windows profile, such as Outlook profile settings, check out their 
+ user specific problem reports, etc. The trouble is that if we don't 
+ know their password (which we don't generally want to know) we have 
+ to change their password, and then somehow alert them to the new 
+ password so that they can login and reset their password when they 
+ get back to their PC after we've worked on it.
+ 
+ This has been a cumbersome problem for us for a while, and to solve 
+ it, I finally wrote tmp-admin-pwreset.pl. What it does is simple: 
+ you pass it a list of usernames and a temporary password. It will 
+ reset the password of all the supplied users (Samba and UNIX) to the 
+ temporary password, but first will backup the current password 
+ *hashes* for each of the users to a file, so that they can be reset 
+ to their original values later on. You then call the script in 
+ another mode ("--restore") and it sets all the password hashes for 
+ both UNIX and Samba to what they were originally.
+ 
+ This effectively allows administrators to be able login as specific 
+ users without knowing their password, and without having to change 
+ their password either. Users won't even know anything changed at all 
+ (and won't call the helpdesk because they can't login; didn't see 
+ the note, didn't listen to the voicemail, etc).
+ 
+ I wrote this for our own use, however, I thought it might be useful 
+ to others, so I am sharing it.
+ 
+ If anyone is interested, the script and documentation can be 
+ downloaded here:
+ 
+ http://devzone.intellitree.com/projects/tmp-admin-pwreset
+ 
+ Best regards,
+ 
+ Henry Van Styn
+ IntelliTree Solutions llc
+ http://www.intellitree.com
+
+
+=head1 CHANGELOG
+
+=over 1
+
+=item 2008-04-30
+Version 0.1 
+Initial program development
+
+=back
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 IntelliTree Solutions llc (http://www.intellitree.com)
+
+Permission is granted to copy, distribute and/or modify this program under the terms of the GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation; with no Invariant Sections, with no Front-Cover Texts, and with no Back-Cover Texts.
+
+If you modify and/or redistribute the script, please preserve orignal author and documentation information.
+
+
+=head1 WARRANTY
+
+This script is free software and comes with B<absolutely no warranty whatsoever>, use at your own risk. The author, and IntelliTree Solutions in general, have no liability for any damage or data loss that may be caused by using this software.
+
+
+=head1 AUTHOR
+
+ Henry Van Styn <vanstyn@intellitree.com>
+ IntelliTree Solutions llc (http://www.intellitree.com)
+
+=cut
